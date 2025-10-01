@@ -1,0 +1,36 @@
+{
+    "name": "ngo-thanh-tan-portfolio",
+    "version": "1.0.0",
+    "description": "Modern IT Portfolio with React and animations",
+    "main": "index.js",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "start": "vite"
+    },
+    "dependencies": {
+        "framer-motion": "^10.18.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "styled-components": "^6.1.19",
+        "typewriter-effect": "^2.22.0"
+    },
+    "devDependencies": {
+        "@types/aos": "^3.0.4",
+        "@types/react": "^18.2.37",
+        "@types/react-dom": "^18.2.15",
+        "@vitejs/plugin-react": "^4.1.0",
+        "typescript": "^5.2.2",
+        "vite": "^4.5.0"
+    },
+    "keywords": [
+        "react",
+        "portfolio",
+        "typescript",
+        "animations",
+        "modern"
+    ],
+    "author": "Ngô Thanh Tân",
+    "license": "MIT"
+}
