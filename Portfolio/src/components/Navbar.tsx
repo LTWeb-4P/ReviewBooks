@@ -124,107 +124,107 @@ const MobileToggle = styled.div`
 `
 
 const Navbar: React.FC = () => {
-    const [scrolled, setScrolled] = useState(false)
-    const [activeSection, setActiveSection] = useState('home')
-    const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [activeSection, setActiveSection] = useState('home')
+  const [mobileOpen, setMobileOpen] = useState(false)
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 50)
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50)
 
-            // Update active section based on scroll position
-            const sections = ['home', 'about', 'skills', 'projects', 'contact']
-            const scrollPosition = window.scrollY + 100
+      // Update active section based on scroll position
+      const sections = ['home', 'about', 'skills', 'projects', 'contact']
+      const scrollPosition = window.scrollY + 100
 
-            for (const section of sections) {
-                const element = document.getElementById(section)
-                if (element) {
-                    const offsetTop = element.offsetTop
-                    const offsetHeight = element.offsetHeight
-
-                    if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-                        setActiveSection(section)
-                        break
-                    }
-                }
-            }
-        }
-
-        window.addEventListener('scroll', handleScroll)
-        return () => window.removeEventListener('scroll', handleScroll)
-    }, [])
-
-    const scrollToSection = (sectionId: string) => {
-        const element = document.getElementById(sectionId)
+      for (const section of sections) {
+        const element = document.getElementById(section)
         if (element) {
-            element.scrollIntoView({ behavior: 'smooth' })
-            setMobileOpen(false)
+          const offsetTop = element.offsetTop
+          const offsetHeight = element.offsetHeight
+
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveSection(section)
+            break
+          }
         }
+      }
     }
 
-    const navItems = [
-        { id: 'home', label: 'Trang Chủ' },
-        { id: 'about', label: 'Giới Thiệu' },
-        { id: 'skills', label: 'Kỹ Năng' },
-        { id: 'projects', label: 'Dự Án' },
-        { id: 'contact', label: 'Liên Hệ' }
-    ]
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
-    return (
-        <NavbarContainer
-            scrolled={scrolled}
-            initial={{ y: -100 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.5 }}
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' })
+      setMobileOpen(false)
+    }
+  }
+
+  const navItems = [
+    { id: 'home', label: 'Trang Chủ' },
+    { id: 'about', label: 'Giới Thiệu' },
+    { id: 'skills', label: 'Kỹ Năng' },
+    { id: 'projects', label: 'Dự Án' },
+    { id: 'contact', label: 'Liên Hệ' }
+  ]
+
+  return (
+    <NavbarContainer
+      scrolled={scrolled}
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <NavContent>
+        <Logo
+          href="#section0"
+          onClick={(e) => {
+            e.preventDefault()
+            scrollToSection('home')
+          }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-            <NavContent>
-                <Logo
-                    href="#home"
-                    onClick={(e) => {
-                        e.preventDefault()
-                        scrollToSection('home')
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                >
-                    Portfolio
-                </Logo>
+          Portfolio
+        </Logo>
 
-                <NavMenu isOpen={mobileOpen}>
-                    {navItems.map((item, index) => (
-                        <NavItem
-                            key={item.id}
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                        >
-                            <NavLink
-                                href={`#${item.id}`}
-                                active={activeSection === item.id}
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    scrollToSection(item.id)
-                                }}
-                                whileHover={{ y: -2 }}
-                                whileTap={{ y: 0 }}
-                            >
-                                {item.label}
-                            </NavLink>
-                        </NavItem>
-                    ))}
-                </NavMenu>
+        <NavMenu isOpen={mobileOpen}>
+          {navItems.map((item, index) => (
+            <NavItem
+              key={item.id}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <NavLink
+                href={`#${item.id}`}
+                active={activeSection === item.id}
+                onClick={(e) => {
+                  e.preventDefault()
+                  scrollToSection(item.id)
+                }}
+                whileHover={{ y: -2 }}
+                whileTap={{ y: 0 }}
+              >
+                {item.label}
+              </NavLink>
+            </NavItem>
+          ))}
+        </NavMenu>
 
-                <MobileToggle
-                    isOpen={mobileOpen}
-                    onClick={() => setMobileOpen(!mobileOpen)}
-                >
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </MobileToggle>
-            </NavContent>
-        </NavbarContainer>
-    )
+        <MobileToggle
+          isOpen={mobileOpen}
+          onClick={() => setMobileOpen(!mobileOpen)}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </MobileToggle>
+      </NavContent>
+    </NavbarContainer>
+  )
 }
 
 export default Navbar
