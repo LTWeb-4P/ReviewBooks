@@ -7,7 +7,8 @@
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
-        "start": "vite"
+        "start": "vite",
+        "postinstall": "node -e \"try{require('fs').chmodSync('node_modules/.bin/vite',0o755)}catch(e){}\""
     },
     "dependencies": {
         "framer-motion": "^10.18.0",
