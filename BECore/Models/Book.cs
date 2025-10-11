@@ -7,8 +7,8 @@ namespace BECore.Models
 {
     public class Book
     {
-        public string Id { get; set; } = string.Empty; // Google Book ID
-        public string Title { get; set; } = string.Empty;
+        public Guid Id { get; set; }
+        public string Title { get; set; }
         public string? Authors { get; set; }
         public string? Publisher { get; set; }
         public string? Description { get; set; }

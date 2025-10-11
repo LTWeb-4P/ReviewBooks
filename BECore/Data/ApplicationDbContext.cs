@@ -21,6 +21,7 @@ namespace BECore.Data
 
             // Áp dụng cấu hình riêng từng entity
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+            
         }
     }
 }
