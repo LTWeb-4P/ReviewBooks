@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using BECore.Users.Models;
 using BECore.Books.Models;
 
-namespace BECore.Reivews.Models
+namespace BECore.Reviews.Models
 {
     public class Review
     {

@@ -1,6 +1,6 @@
 
 
-namespace BECore.Book.Models
+namespace BECore.Books.Models
 {
     public class BookCaches
     {

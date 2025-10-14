@@ -1,4 +1,4 @@
-using BECore.Reivews.Models;
+using BECore.Reviews.Models;
 
 namespace BECore.Books.Models
 {

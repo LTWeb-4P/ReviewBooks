@@ -1,7 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using BECore.Books.Models;
-using BECore.Users.Models;
-using BECore.Reivews.Models;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace BECore.Data
@@ -13,9 +11,9 @@ namespace BECore.Data
 
         // Các DbSet tương ứng với các bảng
         public DbSet<BECore.Users.Models.User> Users { get; set; }
-        public DbSet<Book> Books { get; set; }
-        public DbSet<BookCaches> BookCaches { get; set; }
-        public DbSet<Review> Reviews { get; set; }
+        public DbSet<BECore.Books.Models.Book> Books { get; set; }
+        public DbSet<BECore.Books.Models.BookCaches> BookCaches { get; set; }
+        public DbSet<BECore.Reviews.Models.Review> Reviews { get; set; }
         public DbSet<BECore.Favorite.Models.Favorite> Favorites { get; set; }
 
 
@@ -25,7 +23,7 @@ namespace BECore.Data
 
             // Áp dụng cấu hình riêng từng entity
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-            modelBuilder.Entity<BookCache>().HasNoKey();
+            modelBuilder.Entity<BookCaches>().HasNoKey();
 
         }
     }

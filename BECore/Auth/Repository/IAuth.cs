@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BECore.Dto;
+using BECore.Users.Dto;
 using BECore.Users.Models;
 
 namespace BECore.Interface

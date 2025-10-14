@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BECore.Models;
+using BECore.Reviews.Models;
 
-namespace BECore.Dto
+namespace BECore.Books.Dto
 {
     public class BookDto
     {
