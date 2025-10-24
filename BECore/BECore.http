@@ -1,6 +1,0 @@
-@BECore_HostAddress = http://localhost:5072
-
-GET {{BECore_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
