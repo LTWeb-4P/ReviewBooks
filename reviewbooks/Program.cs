@@ -21,7 +21,6 @@ using Npgsql;
 var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
-// 🔹 Load connection string và thay biến môi trường
 var rawConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
 var connectionString = rawConnection
     .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
@@ -30,10 +29,8 @@ var connectionString = rawConnection
     .Replace("${DB_USER}", Environment.GetEnvironmentVariable("DB_USER") ?? "postgres")
     .Replace("${DB_PASSWORD}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "");
 
-// 🔹 Dùng builder của PostgreSQL
 var builderDb = new NpgsqlConnectionStringBuilder(connectionString);
 
-// 🔹 In ra thông tin kết nối (ẩn password)
 Console.WriteLine(
     @$"[ReviewBooksService] DB: Host={builderDb.Host};Port={builderDb.Port};
     Database={builderDb.Database};Username={builderDb.Username};
@@ -41,13 +38,11 @@ Console.WriteLine(
     SSL Mode={builderDb.SslMode}"
 );
 
-// ✅ Đăng ký DbContext (PostgreSQL)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(connectionString);
 });
 
-// ✅ JWT Config
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
@@ -73,10 +68,34 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\n\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\""
+    });
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+{
+    {
+        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+        {
+            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+            {
+                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                Id = "Bearer"
+            }
+        },
+        Array.Empty<string>()
+    }
+});
+});
 builder.Services.AddAutoMapper(typeof(Program));
 
-// 🔹 Đăng ký repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -93,7 +112,6 @@ builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
 
 var app = builder.Build();
 
-// 🔹 In ra thông tin service đang chạy
 var apiUrl = Environment.GetEnvironmentVariable("REVIEWBOOKS_API_URL") ?? "http://localhost:5072";
 Console.WriteLine($"ReviewBooks API listening on: {apiUrl}");
 

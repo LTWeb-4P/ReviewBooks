@@ -13,6 +13,9 @@ namespace ReviewBooks.Books.Models
         public string? Thumbnail { get; set; }
         public double? AverageRating { get; set; }
         public int? RatingsCount { get; set; }
+
+        public string? Content { get; set; }
+
         public DateTime CachedAt { get; set; } = DateTime.UtcNow;
         public ICollection<Review>? Reviews { get; set; } = new List<Review>();
         public ICollection<User>? FavoritedByUsers { get; set; } = new List<User>();
