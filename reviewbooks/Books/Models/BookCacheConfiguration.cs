@@ -20,7 +20,7 @@ namespace ReviewBooks.Books.Models
 
             builder.Property(c => c.JsonData)
                 .IsRequired()
-                .HasColumnType("nvarchar(max)"); // Store full JSON response
+                .HasColumnType("text"); // Store full JSON response
 
             builder.Property(c => c.CachedAt)
                 .IsRequired();

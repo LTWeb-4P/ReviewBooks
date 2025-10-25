@@ -15,59 +15,48 @@ using ReviewBooks.Favorite.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using DotNetEnv;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
+Env.Load();
 
-builder.Services.AddOpenApi();
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options => 
+// 🔹 Load connection string và thay biến môi trường
+var rawConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
+var connectionString = rawConnection
+    .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
+    .Replace("${DB_PORT}", Environment.GetEnvironmentVariable("DB_PORT") ?? "5432")
+    .Replace("${DB_NAME}", Environment.GetEnvironmentVariable("DB_NAME") ?? "reviewbooks")
+    .Replace("${DB_USER}", Environment.GetEnvironmentVariable("DB_USER") ?? "postgres")
+    .Replace("${DB_PASSWORD}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "");
+
+// 🔹 Dùng builder của PostgreSQL
+var builderDb = new NpgsqlConnectionStringBuilder(connectionString);
+
+// 🔹 In ra thông tin kết nối (ẩn password)
+Console.WriteLine(
+    @$"[ReviewBooksService] DB: Host={builderDb.Host};Port={builderDb.Port};
+    Database={builderDb.Database};Username={builderDb.Username};
+    Password={(string.IsNullOrEmpty(builderDb.Password) ? "(empty)" : "******")};
+    SSL Mode={builderDb.SslMode}"
+);
+
+// ✅ Đăng ký DbContext (PostgreSQL)
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-    {
-        Title = "ReviewBooks API",
-        Version = "v1"
-    });
-
-    var jwtSecurityScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        Name = "JWT Authentication",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Description = "Put **_ONLY_** your JWT Bearer token on textbox below!",
-
-        Reference = new Microsoft.OpenApi.Models.OpenApiReference
-        {
-            Id = JwtBearerDefaults.AuthenticationScheme,
-            Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme
-        }
-    };
-
-    options.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
-
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        { jwtSecurityScheme, Array.Empty<string>() }
-    });
+    options.UseNpgsql(connectionString);
 });
 
-builder.Services.AddAutoMapper(typeof(Program));
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
+// ✅ JWT Config
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
     var jwtSettings = builder.Configuration.GetSection("Jwt");
-    var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+    var keyValue = jwtSettings["Key"];
+    if (string.IsNullOrEmpty(keyValue))
+        throw new InvalidOperationException("JWT Key missing in configuration");
 
+    var key = Encoding.UTF8.GetBytes(keyValue);
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -82,8 +71,12 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddAutoMapper(typeof(Program));
 
-// Register repositories and services
+// 🔹 Đăng ký repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -98,8 +91,11 @@ builder.Services.AddScoped<IForumRepository, ForumRepository>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
 
-
 var app = builder.Build();
+
+// 🔹 In ra thông tin service đang chạy
+var apiUrl = Environment.GetEnvironmentVariable("REVIEWBOOKS_API_URL") ?? "http://localhost:5072";
+Console.WriteLine($"ReviewBooks API listening on: {apiUrl}");
 
 if (app.Environment.IsDevelopment())
 {
@@ -108,11 +104,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
-
