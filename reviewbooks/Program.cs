@@ -65,6 +65,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     };
 });
 
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<EmailService>();
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowCORS",
+        policy => policy
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .WithOrigins("http://localhost:5500")
+    );
+});
+
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -77,7 +92,6 @@ builder.Services.AddSwaggerGen(options =>
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
         Scheme = "Bearer",
         BearerFormat = "JWT",
-        Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\n\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\""
     });
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
 {
@@ -115,7 +129,7 @@ var app = builder.Build();
 var apiUrl = Environment.GetEnvironmentVariable("REVIEWBOOKS_API_URL") ?? "http://localhost:5072";
 Console.WriteLine($"ReviewBooks API listening on: {apiUrl}");
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -125,5 +139,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseCors("AllowCORS");
 
 app.Run();

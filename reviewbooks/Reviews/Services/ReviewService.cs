@@ -3,6 +3,7 @@ using ReviewBooks.Reviews.Models;
 using Shared;
 using ReviewBooks.Reviews.Dto;
 using AutoMapper;
+using ReviewBooks.Books.Repository;
 
 namespace ReviewBooks.Reviews.Services
 {
@@ -21,11 +22,13 @@ namespace ReviewBooks.Reviews.Services
     public class ReviewService : IReviewService
     {
         private readonly IReviewRepository _reviewRepository;
+        private readonly IBookRepository _bookRepository;
         private readonly IMapper _mapper;
 
-        public ReviewService(IReviewRepository reviewRepository, IMapper mapper)
+        public ReviewService(IReviewRepository reviewRepository, IBookRepository bookRepository, IMapper mapper)
         {
             _reviewRepository = reviewRepository;
+            _bookRepository = bookRepository;
             _mapper = mapper;
         }
 
@@ -35,6 +38,10 @@ namespace ReviewBooks.Reviews.Services
             reviewEntity.UserId = currentUserId; // Override with authenticated user
             reviewEntity.CreatedAt = DateTime.UtcNow;
             await _reviewRepository.CreateReviewAsync(reviewEntity);
+
+            // Update book ratings after creating review
+            await _bookRepository.UpdateBookRatingsAsync(dto.BookId);
+
             return _mapper.Map<ReviewDetailDto>(reviewEntity);
         }
 
@@ -49,7 +56,15 @@ namespace ReviewBooks.Reviews.Services
                 throw new UnauthorizedAccessException("You can only delete your own reviews.");
             }
 
-            return await _reviewRepository.DeleteReviewAsync(id);
+            var deleted = await _reviewRepository.DeleteReviewAsync(id);
+
+            // Update book ratings after deleting review
+            if (deleted)
+            {
+                await _bookRepository.UpdateBookRatingsAsync(review.BookId);
+            }
+
+            return deleted;
         }
 
         public async Task<ReviewDetailDto?> GetReviewByIdAsync(Guid id)
@@ -219,6 +234,9 @@ namespace ReviewBooks.Reviews.Services
 
             var updated = await _reviewRepository.UpdateReviewAsync(id, review);
             if (updated == null) return null;
+
+            // Update book ratings after updating review
+            await _bookRepository.UpdateBookRatingsAsync(review.BookId);
 
             var result = _mapper.Map<ReviewDetailDto>(updated);
             result.Username = updated.User?.Username;

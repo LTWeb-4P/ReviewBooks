@@ -11,8 +11,14 @@ namespace ReviewBooks.Books.Models
         public string? Publisher { get; set; }
         public string? Description { get; set; }
         public string? Thumbnail { get; set; }
+
+        // Google Books ratings (external)
         public double? AverageRating { get; set; }
         public int? RatingsCount { get; set; }
+
+        // System ratings (from user reviews)
+        public double? SystemAverageRating { get; set; }
+        public int SystemRatingsCount { get; set; } = 0;
 
         public string? Content { get; set; }
 

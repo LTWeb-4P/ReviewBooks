@@ -8,5 +8,6 @@ namespace ReviewBooks.Books.Repository
         Task<BookCache?> GetBookCacheAsync(string bookId, CancellationToken ct = default);
         Task UpsertBookAsync(Book book, CancellationToken ct = default);
         Task UpsertBookCacheAsync(BookCache cache, CancellationToken ct = default);
+        Task UpdateBookRatingsAsync(string bookId, CancellationToken ct = default);
     }
 }

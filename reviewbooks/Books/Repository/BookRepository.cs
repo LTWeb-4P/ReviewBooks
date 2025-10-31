@@ -58,5 +58,28 @@ namespace ReviewBooks.Books.Repository
             }
             await _db.SaveChangesAsync(ct);
         }
+
+        public async Task UpdateBookRatingsAsync(string bookId, CancellationToken ct = default)
+        {
+            var book = await _db.Books
+                .Include(b => b.Reviews)
+                .FirstOrDefaultAsync(b => b.Id == bookId, ct);
+
+            if (book == null) return;
+
+            // Calculate system ratings from user reviews
+            if (book.Reviews != null && book.Reviews.Any())
+            {
+                book.SystemAverageRating = Math.Round(book.Reviews.Average(r => r.Rating), 1);
+                book.SystemRatingsCount = book.Reviews.Count;
+            }
+            else
+            {
+                book.SystemAverageRating = null;
+                book.SystemRatingsCount = 0;
+            }
+
+            await _db.SaveChangesAsync(ct);
+        }
     }
 }

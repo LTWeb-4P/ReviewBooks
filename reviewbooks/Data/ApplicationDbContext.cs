@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ReviewBooks.Reviews.Models;
 using ReviewBooks.Users.Models;
 using ReviewBooks.Forum.Model;
+using ReviewBooks.Auth.Models;
 
 namespace ReviewBooks.Data
 {
@@ -18,6 +19,7 @@ namespace ReviewBooks.Data
         public DbSet<Review> Reviews { get; set; }
         public DbSet<ForumPost> ForumPosts { get; set; }
         public DbSet<ForumComment> ForumComments { get; set; }
+        public DbSet<PendingRegistration> PendingRegistrations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

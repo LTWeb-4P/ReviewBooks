@@ -39,6 +39,11 @@ namespace ReviewBooks.Users.Models
         [MaxLength(20)]
         public string? Gender { get; set; }
 
+        // Email verification
+        public bool EmailConfirmed { get; set; } = false;
+        public string? EmailVerifyToken { get; set; }
+        public DateTime? EmailVerifyTokenExpires { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

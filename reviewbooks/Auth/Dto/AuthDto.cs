@@ -37,4 +37,10 @@ namespace ReviewBooks.Auth.Dto
         public string Username { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
     }
+
+    public class ResendVerificationDto
+    {
+        [Required, EmailAddress]
+        public required string Email { get; set; }
+    }
 }
