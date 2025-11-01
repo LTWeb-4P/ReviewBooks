@@ -36,6 +36,21 @@ namespace ReviewBooks.Books.Models
             builder.Property(b => b.CachedAt)
                 .IsRequired();
 
+            builder.Property(b => b.PublishedDate)
+                .IsRequired(false);
+
+            builder.Property(b => b.ISBN)
+            .HasMaxLength(20);
+
+            builder.Property(b => b.Categories)
+            .HasMaxLength(200);
+
+            builder.Property(b => b.Price)
+                .HasPrecision(10, 2); // e.g. 19.99
+                
+            builder.Property(b => b.Url_Buy)
+                .HasMaxLength(500);
+
             // Index for performance
             builder.HasIndex(b => b.CachedAt)
                 .HasDatabaseName("IX_Books_CachedAt");

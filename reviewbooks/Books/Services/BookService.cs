@@ -84,6 +84,11 @@ namespace ReviewBooks.Books.Services
             book.Thumbnail = dto.Thumbnail;
             book.AverageRating = dto.AverageRating;
             book.RatingsCount = dto.RatingsCount;
+            book.PublishedDate = dto.PublishedDate;
+            book.ISBN = dto.ISBN;
+            book.Categories = dto.Categories;
+            book.Price = dto.Price;
+            book.Url_Buy = dto.Url_Buy;
             book.CachedAt = DateTime.UtcNow;
 
             await _repo.UpsertBookAsync(book, ct);
@@ -190,6 +195,11 @@ namespace ReviewBooks.Books.Services
                             Thumbnail = dto.Thumbnail,
                             AverageRating = dto.AverageRating,
                             RatingsCount = dto.RatingsCount,
+                            PublishedDate = dto.PublishedDate,
+                            ISBN = dto.ISBN,
+                            Categories = dto.Categories,
+                            Price = dto.Price,
+                            Url_Buy = dto.Url_Buy,
                             CachedAt = DateTime.UtcNow
                         };
                         await _repo.UpsertBookAsync(book, ct);
@@ -273,6 +283,108 @@ namespace ReviewBooks.Books.Services
                     ratingsCount = i;
                 }
 
+                double? price = null;
+                if (vi.TryGetProperty("price", out var priceEl) && priceEl.ValueKind == JsonValueKind.Number && priceEl.TryGetDouble(out var priceVal))
+                {
+                    price = priceVal;
+                }
+
+                string? url = null;
+                if (vi.TryGetProperty("buyLink", out var urlEl) && urlEl.ValueKind == JsonValueKind.String)
+                {
+                    url = urlEl.GetString();
+                }
+
+                DateTime? publishedDate = null;
+                if (vi.TryGetProperty("publishedDate", out var pdEl) && pdEl.ValueKind == JsonValueKind.String)
+                {
+                    var pdStr = pdEl.GetString();
+                    if (!string.IsNullOrWhiteSpace(pdStr))
+                    {
+                        DateTime parsed;
+
+                        if (pdStr!.Length == 4 && int.TryParse(pdStr, out var year))
+                        {
+                            parsed = new DateTime(year, 1, 1);
+                        }
+                        else if (pdStr.Length == 7 && DateTime.TryParse(pdStr + "-01", out parsed))
+                        {
+                            // parsed ok
+                        }
+                        // Full date
+                        else if (DateTime.TryParse(pdStr, out parsed))
+                        {
+                            // parsed ok
+                        }
+                        else
+                        {
+                            parsed = DateTime.UtcNow; // fallback tránh lỗi
+                        }
+                        publishedDate = DateTime.SpecifyKind(parsed, DateTimeKind.Utc);
+                    }
+                }
+
+                string? isbn = null;
+                if (vi.TryGetProperty("industryIdentifiers", out var iiArr) && iiArr.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var iden in iiArr.EnumerateArray())
+                    {
+                        if (iden.ValueKind == JsonValueKind.Object &&
+                            iden.TryGetProperty("type", out var typeEl) && typeEl.ValueKind == JsonValueKind.String &&
+                            iden.TryGetProperty("identifier", out var identifierEl) && identifierEl.ValueKind == JsonValueKind.String)
+                        {
+                            var typeStr = typeEl.GetString();
+                            if (typeStr == "ISBN_13" || typeStr == "ISBN_10")
+                            {
+                                isbn = identifierEl.GetString();
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Parse Categories
+                string? categories = null;
+                if (vi.TryGetProperty("categories", out var catArr) && catArr.ValueKind == JsonValueKind.Array)
+                {
+                    var catList = new List<string>();
+                    foreach (var cat in catArr.EnumerateArray())
+                    {
+                        if (cat.ValueKind == JsonValueKind.String)
+                        {
+                            var catStr = cat.GetString();
+                            if (!string.IsNullOrWhiteSpace(catStr))
+                                catList.Add(catStr);
+                        }
+                    }
+                    categories = catList.Count > 0 ? string.Join(", ", catList) : null;
+                }
+
+                // Parse Price and Buy Link from saleInfo
+                double? salePrice = null;
+                string? buyLink = null;
+                if (item.TryGetProperty("saleInfo", out var saleInfo) && saleInfo.ValueKind == JsonValueKind.Object)
+                {
+                    // Get price
+                    if (saleInfo.TryGetProperty("listPrice", out var listPriceObj) && listPriceObj.ValueKind == JsonValueKind.Object)
+                    {
+                        if (listPriceObj.TryGetProperty("amount", out var amountEl) && amountEl.ValueKind == JsonValueKind.Number && amountEl.TryGetDouble(out var amount))
+                        {
+                            salePrice = amount;
+                        }
+                    }
+                    // Get buy link
+                    if (saleInfo.TryGetProperty("buyLink", out var buyLinkEl) && buyLinkEl.ValueKind == JsonValueKind.String)
+                    {
+                        buyLink = buyLinkEl.GetString();
+                    }
+                }
+
+                // Use saleInfo data if available, otherwise fall back to volumeInfo
+                price = salePrice ?? price;
+                url = buyLink ?? url;
+
+
                 return new BookDto
                 {
                     Id = id,
@@ -282,6 +394,11 @@ namespace ReviewBooks.Books.Services
                     Description = GetString(vi, "description"),
                     Thumbnail = thumbnail,
                     AverageRating = avgRating,
+                    Price = price,
+                    Url_Buy = url,
+                    ISBN = isbn,
+                    PublishedDate = publishedDate,
+                    Categories = categories,
                     RatingsCount = ratingsCount
                 };
             }
@@ -339,6 +456,43 @@ namespace ReviewBooks.Books.Services
                     ratingsCount = i;
                 }
 
+                string? publishedDate = null;
+                if (vi.TryGetProperty("publishedDate", out var pd) && pd.ValueKind == JsonValueKind.String)
+                {
+                    publishedDate = pd.GetString();
+                }
+
+                string? isbn = null;
+                if (vi.TryGetProperty("industryIdentifiers", out var iiArr) && iiArr.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var iden in iiArr.EnumerateArray())
+                    {
+                        if (iden.ValueKind == JsonValueKind.Object &&
+                            iden.TryGetProperty("type", out var typeEl) && typeEl.ValueKind == JsonValueKind.String &&
+                            iden.TryGetProperty("identifier", out var identifierEl) && identifierEl.ValueKind == JsonValueKind.String)
+                        {
+                            var typeStr = typeEl.GetString();
+                            if (typeStr == "ISBN_13" || typeStr == "ISBN_10")
+                            {
+                                isbn = identifierEl.GetString();
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                double? price = null;
+                if (vi.TryGetProperty("price", out var priceEl) && priceEl.ValueKind == JsonValueKind.Number && priceEl.TryGetDouble(out var priceVal))
+                {
+                    price = priceVal;
+                }
+
+                string? url = null;
+                if (vi.TryGetProperty("buyLink", out var urlEl) && urlEl.ValueKind == JsonValueKind.String)
+                {
+                    url = urlEl.GetString();
+                }
+
                 return new BookDto
                 {
                     Id = id,
@@ -348,7 +502,11 @@ namespace ReviewBooks.Books.Services
                     Description = GetString(vi, "description"),
                     Thumbnail = thumbnail,
                     AverageRating = avgRating,
-                    RatingsCount = ratingsCount
+                    RatingsCount = ratingsCount,
+                    ISBN = isbn,
+                    PublishedDate = string.IsNullOrWhiteSpace(publishedDate) ? null : DateTime.Parse(publishedDate),
+                    Price = price,
+                    Url_Buy = url
                 };
             }
             catch

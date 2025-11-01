@@ -55,7 +55,7 @@ namespace ReviewBooks.Data
                     {
                         j.HasKey("UserId", "BookId");
                         j.ToTable("UserFavoriteBooks");
-                        j.Property<DateTime>("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
+                        j.Property<DateTime>("CreatedAt").HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
                     });
 
             // Quan hệ 1-nhiều: User - ForumPost

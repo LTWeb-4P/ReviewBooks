@@ -39,6 +39,11 @@ namespace ReviewBooks.Books.Repository
                 tracked.Thumbnail = book.Thumbnail;
                 tracked.AverageRating = book.AverageRating;
                 tracked.RatingsCount = book.RatingsCount;
+                tracked.PublishedDate = book.PublishedDate;
+                tracked.ISBN = book.ISBN;
+                tracked.Categories = book.Categories;
+                tracked.Price = book.Price;
+                tracked.Url_Buy = book.Url_Buy;
                 tracked.CachedAt = book.CachedAt;
             }
             await _db.SaveChangesAsync(ct);
