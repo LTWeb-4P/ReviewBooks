@@ -11,7 +11,7 @@ namespace ReviewBooks.Auth.Services
         public bool EnableSsl { get; set; } = true;
         public string UserName { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-        public string FromName { get; set; } = "ReviewBooks Team";
+        public string FromName { get; set; } = "Books Team";
     }
 
     public class EmailService

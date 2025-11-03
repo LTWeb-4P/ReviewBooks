@@ -25,8 +25,8 @@ namespace ReviewBooks.Auth.Services
         private readonly ApplicationDbContext _context;
 
         public AuthService(
-            IUserRepository userRepository, 
-            ITokenRepository tokenRepository, 
+            IUserRepository userRepository,
+            ITokenRepository tokenRepository,
             EmailService emailService,
             IConfiguration configuration,
             ApplicationDbContext context)
@@ -48,7 +48,7 @@ namespace ReviewBooks.Auth.Services
 
             var existingPending = await _context.PendingRegistrations
                 .FirstOrDefaultAsync(p => p.Email == dto.Email);
-            
+
             if (existingPending != null)
             {
                 _context.PendingRegistrations.Remove(existingPending);
@@ -79,9 +79,11 @@ namespace ReviewBooks.Auth.Services
 
         private async Task SendVerificationEmailAsync(PendingRegistration pendingUser)
         {
-            var backendUrl = _configuration["App:BackendUrl"] ?? "http://localhost:5072";
+            Console.WriteLine($"[SendVerificationEmailAsync] pendingUser.Email = '{pendingUser.Email}'");
+
+            var backendUrl = _configuration["App:BackendUrl"] ?? "http://localhost:8080/swagger/index.html";
             var verifyUrl = $"{backendUrl}/api/auth/verify-email?userId={pendingUser.Id}&token={pendingUser.VerifyToken}";
-            
+
             var emailBody = $@"
 <!DOCTYPE html>
 <html>
@@ -95,7 +97,7 @@ namespace ReviewBooks.Auth.Services
 </head>
 <body>
     <div class='container'>
-        <div class='header'><h1>Welcome to ReviewBooks!</h1></div>
+        <div class='header'><h1>Welcome to BooksTwilight!</h1></div>
         <div style='padding: 20px;'>
             <h2>Hi {pendingUser.Username},</h2>
             <p>Please verify your email:</p>

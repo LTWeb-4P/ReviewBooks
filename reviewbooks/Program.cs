@@ -18,8 +18,8 @@ using System.Text;
 using DotNetEnv;
 using Npgsql;
 
-var builder = WebApplication.CreateBuilder(args);
 Env.Load();
+var builder = WebApplication.CreateBuilder(args);
 
 var bookApiKey = Environment.GetEnvironmentVariable("BOOK_API_KEY") ?? "";
 builder.Configuration["GoogleBooks:ApiKey"] = bookApiKey;
@@ -67,7 +67,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddEnvironmentVariables();
 
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
@@ -118,7 +120,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
-builder.Services.AddHttpClient();
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
@@ -127,10 +128,11 @@ builder.Services.AddScoped<IForumService, ForumService>();
 builder.Services.AddScoped<IForumRepository, ForumRepository>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
-var apiUrl = Environment.GetEnvironmentVariable("REVIEWBOOKS_API_URL") ?? "http://localhost:5072";
+var apiUrl = Environment.GetEnvironmentVariable("https://reviewbooks.onrender.com/api/books/") ?? "http://localhost:8080/swagger/index.html";
 Console.WriteLine($"ReviewBooks API listening on: {apiUrl}");
 
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production"))
