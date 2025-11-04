@@ -110,8 +110,7 @@ dotnet ef migrations add InitialMigration
 dotnet run
 ```
 
-API sẽ chạy tại: `http://localhost:5072`  
-Swagger UI: `http://localhost:5072/swagger`
+Swagger UI: `http://localhost:8080/swagger`
 
 ---
 
