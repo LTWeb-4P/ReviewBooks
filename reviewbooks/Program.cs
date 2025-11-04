@@ -18,12 +18,11 @@ using System.Text;
 using DotNetEnv;
 using Npgsql;
 
-Env.Load();
 var builder = WebApplication.CreateBuilder(args);
+var envPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".env");
+DotNetEnv.Env.Load(envPath);
 
 var bookApiKey = Environment.GetEnvironmentVariable("BOOK_API_KEY") ?? "";
-builder.Configuration["GoogleBooks:ApiKey"] = bookApiKey;
-
 var rawConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
 var connectionString = rawConnection
     .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
@@ -34,20 +33,24 @@ var connectionString = rawConnection
 
 var builderDb = new NpgsqlConnectionStringBuilder(connectionString);
 
-Console.WriteLine(
-    @$"[ReviewBooksService] DB: Host={builderDb.Host};Port={builderDb.Port};
-    Database={builderDb.Database};Username={builderDb.Username};
-    Password={(string.IsNullOrEmpty(builderDb.Password) ? "(empty)" : "******")};
-    SSL Mode={builderDb.SslMode}"
-);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(connectionString);
 });
 
-var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
-            ?? throw new InvalidOperationException("JWT_KEY not set");
+// Read JWT Key from environment variable or appsettings.json
+var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")?.Split('\n', '\r')[0].Trim()
+    ?? builder.Configuration["Jwt:Key"];
+
+if (string.IsNullOrEmpty(jwtKey))
+{
+    throw new InvalidOperationException("JWT Key is not configured. Set JWT_KEY environment variable or Jwt:Key in appsettings.json");
+}
+
+// Read JWT Issuer and Audience from environment or appsettings
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? builder.Configuration["Jwt:Issuer"];
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? builder.Configuration["Jwt:Audience"];
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -60,8 +63,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
             IssuerSigningKey = new SymmetricSecurityKey(key),
             ClockSkew = TimeSpan.Zero
         };
@@ -94,10 +97,11 @@ builder.Services.AddSwaggerGen(options =>
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Scheme = "Bearer",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "bearer",
         BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme. Enter your token in the text input below."
     });
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
 {
@@ -132,7 +136,7 @@ builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
-var apiUrl = Environment.GetEnvironmentVariable("https://reviewbooks.onrender.com/api/books/") ?? "http://localhost:8080/swagger/index.html";
+var apiUrl = Environment.GetEnvironmentVariable("BackendUrl") ?? "http://localhost:8080/swagger/index.html";
 Console.WriteLine($"ReviewBooks API listening on: {apiUrl}");
 
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production"))
@@ -141,10 +145,10 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Production
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowCORS");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.UseCors("AllowCORS");
 
 app.Run();

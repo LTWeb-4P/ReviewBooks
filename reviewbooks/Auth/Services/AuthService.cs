@@ -97,7 +97,7 @@ namespace ReviewBooks.Auth.Services
 </head>
 <body>
     <div class='container'>
-        <div class='header'><h1>Welcome to BooksTwilight!</h1></div>
+        <div class='header'><h1>Welcome to BooksNest!</h1></div>
         <div style='padding: 20px;'>
             <h2>Hi {pendingUser.Username},</h2>
             <p>Please verify your email:</p>

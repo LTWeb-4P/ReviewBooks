@@ -24,13 +24,19 @@ namespace ReviewBooks.Auth.Repository
                 new Claim(ClaimTypes.Role, role)
             };
 
-            var keyString = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+            // Clean JWT_KEY from newlines/whitespace
+            var keyString = (Environment.GetEnvironmentVariable("JWT_KEY") ?? _configuration["Jwt:Key"])
+                ?.Split('\n', '\r')[0].Trim()
+                ?? throw new InvalidOperationException("JWT Key not configured");
+            var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? _configuration["Jwt:Issuer"];
+            var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? _configuration["Jwt:Audience"];
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: issuer,
+                audience: audience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(24), // 24 hours expiration
                 signingCredentials: credentials
