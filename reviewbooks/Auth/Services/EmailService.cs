@@ -17,33 +17,51 @@ namespace ReviewBooks.Auth.Services
     public class EmailService
     {
         private readonly EmailSettings _settings;
+        private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IOptions<EmailSettings> options)
+        public EmailService(IOptions<EmailSettings> options, ILogger<EmailService> logger)
         {
             _settings = options.Value;
+            _logger = logger;
         }
 
         public async Task SendEmailAsync(string to, string subject, string html)
         {
-            using var client = new SmtpClient(_settings.Host, _settings.Port)
+            _logger.LogInformation($"[Email] Host: {_settings.Host}, Port: {_settings.Port}, User: {_settings.UserName?.Substring(0, Math.Min(5, _settings.UserName?.Length ?? 0))}..., HasPassword: {!string.IsNullOrEmpty(_settings.Password)}");
+
+            if (string.IsNullOrEmpty(_settings.Host) || string.IsNullOrEmpty(_settings.UserName) || string.IsNullOrEmpty(_settings.Password))
             {
-                EnableSsl = _settings.EnableSsl,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(_settings.UserName, _settings.Password),
-                DeliveryMethod = SmtpDeliveryMethod.Network
-            };
+                throw new InvalidOperationException("Email settings are not configured properly. Check environment variables.");
+            }
 
-            var mail = new MailMessage()
+            try
             {
-                From = new MailAddress(_settings.UserName, _settings.FromName),
-                Subject = subject,
-                Body = html,
-                IsBodyHtml = true
-            };
+                using var client = new SmtpClient(_settings.Host, _settings.Port)
+                {
+                    EnableSsl = _settings.EnableSsl,
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(_settings.UserName, _settings.Password),
+                    DeliveryMethod = SmtpDeliveryMethod.Network
+                };
 
-            mail.To.Add(to);
+                var mail = new MailMessage()
+                {
+                    From = new MailAddress(_settings.UserName, _settings.FromName),
+                    Subject = subject,
+                    Body = html,
+                    IsBodyHtml = true
+                };
 
-            await client.SendMailAsync(mail);
+                mail.To.Add(to);
+
+                await client.SendMailAsync(mail);
+                _logger.LogInformation($"[Email] Successfully sent to {to}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[Email] Failed to send email: {ex.Message}");
+                throw;
+            }
         }
     }
 }
