@@ -86,98 +86,27 @@ namespace ReviewBooks.Auth.Services
 
             var emailBody = $@"
 <!DOCTYPE html>
-<html lang='en'>
+<html>
 <head>
-  <meta charset='UTF-8'>
-  <title>BooksNest Email Verification</title>
-  <style>
-    body {{
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background-color: #f5f7fa;
-      margin: 0;
-      padding: 0;
-      color: #333;
-    }}
-
-    .container {{
-      max-width: 600px;
-      margin: 40px auto;
-      background-color: #ffffff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }}
-
-    .header {{
-      background: linear-gradient(90deg, #667eea, #764ba2);
-      color: white;
-      padding: 30px 20px;
-      text-align: center;
-    }}
-
-    .header h1 {{
-      margin: 0;
-      font-size: 26px;
-      letter-spacing: 0.5px;
-    }}
-
-    .content {{
-      padding: 30px 40px;
-      line-height: 1.6;
-      text-align: center;
-    }}
-
-    .content h2 {{
-      margin-top: 0;
-      font-size: 20px;
-      color: #333;
-    }}
-
-    .button {{
-      display: inline-block;
-      margin: 20px 0;
-      background: #667eea;
-      color: white !important;
-      padding: 12px 30px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-      letter-spacing: 0.5px;
-      transition: background 0.2s ease;
-    }}
-
-    .button:hover {{
-      background: #5a67d8;
-    }}
-
-    .footer {{
-      background-color: #f1f3f7;
-      text-align: center;
-      padding: 15px;
-      font-size: 13px;
-      color: #777;
-    }}
-  </style>
+    <style>
+        body {{ font-family: Arial, sans-serif; }}
+        .container {{ max-width: 600px; margin: 0 auto; }}
+        .header {{ background: #667eea; color: white; padding: 20px; text-align: center; }}
+        .button {{ background: #667eea; color: white; padding: 12px 30px; text-decoration: none; }}
+    </style>
 </head>
 <body>
-  <div class='container'>
-    <div class='header'>
-      <h1>Welcome to BooksNest!</h1>
+    <div class='container'>
+        <div class='header'><h1>Welcome to BooksNest!</h1></div>
+        <div style='padding: 20px;'>
+            <h2>Hi {pendingUser.Username},</h2>
+            <p>Please verify your email:</p>
+            <p><a href='{verifyUrl}' class='button'>VERIFY EMAIL</a></p>
+            <p>Link expires in 30 minutes.</p>
+        </div>
     </div>
-    <div class='content'>
-      <h2>Hi {pendingUser.Username},</h2>
-      <p>Please verify your email address to complete your registration.</p>
-      <a href='{verifyUrl}' class='button'>VERIFY EMAIL</a>
-      <p style='font-size: 13px; color: #777;'>This link will expire in 30 minutes.</p>
-    </div>
-    <div class='footer'>
-      © 2025 BooksNest. All rights reserved.<br>
-      This email was sent automatically — please do not reply.
-    </div>
-  </div>
 </body>
 </html>";
-
 
             await _emailService.SendEmailAsync(pendingUser.Email, "Verify Your Email", emailBody);
         }
