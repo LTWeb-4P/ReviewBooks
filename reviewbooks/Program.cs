@@ -15,12 +15,12 @@ using ReviewBooks.Favorite.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using DotNetEnv;
 using Npgsql;
 
-var builder = WebApplication.CreateBuilder(args);
 var envPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".env");
 DotNetEnv.Env.Load(envPath);
+var builder = WebApplication.CreateBuilder(args);
+Console.WriteLine("JWT_KEY from .env: " + Environment.GetEnvironmentVariable("JWT_KEY"));
 
 var bookApiKey = Environment.GetEnvironmentVariable("BOOK_API_KEY") ?? "";
 var rawConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
