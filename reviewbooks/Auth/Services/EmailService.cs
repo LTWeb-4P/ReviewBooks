@@ -41,8 +41,11 @@ namespace ReviewBooks.Auth.Services
                     EnableSsl = _settings.EnableSsl,
                     UseDefaultCredentials = false,
                     Credentials = new NetworkCredential(_settings.UserName, _settings.Password),
-                    DeliveryMethod = SmtpDeliveryMethod.Network
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    Timeout = 10000 // 10 seconds timeout
                 };
+
+                _logger.LogInformation($"[Email] Connecting to SMTP server...");
 
                 var mail = new MailMessage()
                 {
@@ -54,12 +57,17 @@ namespace ReviewBooks.Auth.Services
 
                 mail.To.Add(to);
 
+                _logger.LogInformation($"[Email] Sending email to {to}...");
                 await client.SendMailAsync(mail);
                 _logger.LogInformation($"[Email] Successfully sent to {to}");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"[Email] Failed to send email: {ex.Message}");
+                _logger.LogError($"[Email] Failed to send email: {ex.GetType().Name} - {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    _logger.LogError($"[Email] Inner exception: {ex.InnerException.Message}");
+                }
                 throw;
             }
         }
