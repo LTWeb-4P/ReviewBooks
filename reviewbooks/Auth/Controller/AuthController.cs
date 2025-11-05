@@ -27,24 +27,58 @@ namespace ReviewBooks.Auth.Controller
             {
                 var loginResponse = await _authService.VerifyEmailAsync(userId, token);
 
-                // Lấy frontend URL từ config
-                var frontendUrl = _configuration["App:FrontendUrl"] ?? "http://localhost:3000";
-
                 if (loginResponse != null)
                 {
-                    // Redirect về trang chủ FE với success message và JWT token để auto-login
-                    return Redirect($"{frontendUrl}?verified=true&token={loginResponse.Token}&message=Email verified successfully!");
+                    // Return HTML page with auto-redirect to Swagger
+                    var backendUrl = _configuration["App:BackendUrl"] ?? "http://localhost:8080";
+                    var html = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Verified</title>
+    <style>
+        body {{ font-family: Arial; text-align: center; padding: 50px; }}
+        .success {{ color: #28a745; }}
+        .token {{ background: #f5f5f5; padding: 15px; margin: 20px; word-break: break-all; }}
+        button {{ background: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px; }}
+    </style>
+</head>
+<body>
+    <h1 class='success'>✓ Email Verified Successfully!</h1>
+    <p>Your JWT Token:</p>
+    <div class='token'>{loginResponse.Token}</div>
+    <p>Copy the token above and use it in Swagger Authorization</p>
+    <button onclick=""window.location.href='{backendUrl}/swagger/index.html'"">Go to Swagger</button>
+</body>
+</html>";
+                    return Content(html, "text/html");
                 }
                 else
                 {
-                    // Redirect về trang chủ FE với error message
-                    return Redirect($"{frontendUrl}?verified=false&message=Invalid or expired verification link");
+                    var html = @"
+<!DOCTYPE html>
+<html>
+<head><title>Verification Failed</title></head>
+<body style='font-family: Arial; text-align: center; padding: 50px;'>
+    <h1 style='color: #dc3545;'>✗ Verification Failed</h1>
+    <p>Invalid or expired verification link</p>
+</body>
+</html>";
+                    return Content(html, "text/html");
                 }
             }
             catch (Exception)
             {
-                var frontendUrl = _configuration["App:FrontendUrl"] ?? "http://localhost:3000";
-                return Redirect($"{frontendUrl}?verified=false&message=Verification failed");
+                var html = @"
+<!DOCTYPE html>
+<html>
+<head><title>Error</title></head>
+<body style='font-family: Arial; text-align: center; padding: 50px;'>
+    <h1 style='color: #dc3545;'>✗ Verification Failed</h1>
+    <p>An error occurred during verification</p>
+</body>
+</html>";
+                return Content(html, "text/html");
             }
         }
 
