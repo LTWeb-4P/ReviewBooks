@@ -17,10 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Npgsql;
 
-var envPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".env");
-DotNetEnv.Env.Load(envPath);
 var builder = WebApplication.CreateBuilder(args);
-Console.WriteLine("JWT_KEY from .env: " + Environment.GetEnvironmentVariable("JWT_KEY"));
 
 var bookApiKey = Environment.GetEnvironmentVariable("BOOK_API_KEY") ?? "";
 var rawConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
