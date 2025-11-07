@@ -88,21 +88,71 @@ namespace ReviewBooks.Auth.Services
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset='UTF-8'>
     <style>
-        body {{ font-family: Arial, sans-serif; }}
-        .container {{ max-width: 600px; margin: 0 auto; }}
-        .header {{ background: #667eea; color: white; padding: 20px; text-align: center; }}
-        .button {{ background: #667eea; color: white; padding: 12px 30px; text-decoration: none; }}
+        body {{
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }}
+        .container {{
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }}
+        .header {{
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }}
+        .header h1 {{
+            margin: 0;
+            font-size: 24px;
+        }}
+        .content {{
+            padding: 30px 25px;
+            color: #333333;
+            line-height: 1.6;
+        }}
+        .content h2 {{
+            color: #444444;
+        }}
+        .button {{
+            display: inline-block;
+            background-color: #667eea;
+            color: #ffffff !important;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 15px;
+        }}
+        .footer {{
+            text-align: center;
+            padding: 15px;
+            font-size: 13px;
+            color: #999999;
+        }}
     </style>
 </head>
 <body>
     <div class='container'>
-        <div class='header'><h1>Welcome to BooksNest!</h1></div>
-        <div style='padding: 20px;'>
+        <div class='header'>
+            <h1>Welcome to BooksNest!</h1>
+        </div>
+        <div class='content'>
             <h2>Hi {pendingUser.Username},</h2>
-            <p>Please verify your email:</p>
+            <p>Thank you for joining BooksNest! Please verify your email address by clicking the button below:</p>
             <p><a href='{verifyUrl}' class='button'>VERIFY EMAIL</a></p>
-            <p>Link expires in 30 minutes.</p>
+            <p>This link will expire in <strong>30 minutes</strong>.</p>
+        </div>
+        <div class='footer'>
+            &copy; {DateTime.Now.Year} BooksNest. All rights reserved.
         </div>
     </div>
 </body>
