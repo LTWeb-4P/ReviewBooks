@@ -32,11 +32,11 @@ ReviewBooks là một REST API backend toàn diện cung cấp nền tảng đ�
 | Lớp                      | Công Nghệ                     |
 | ------------------------ | ----------------------------- |
 | **Framework**            | ASP.NET Core 9.0 Web API      |
-| **Cơ Sở Dữ Liệu**       | PostgreSQL (Cloud: Aiven)     |
+| **Cơ Sở Dữ Liệu**        | PostgreSQL (Cloud: Aiven)     |
 | **ORM**                  | Entity Framework Core 9.0     |
 | **Xác Thực**             | JWT Bearer Tokens             |
 | **Bảo Mật Mật Khẩu**     | BCrypt.Net-Next               |
-| **Email**                | SMTP (Gmail/Ethereal)         |
+| **Email**                | SMTP (Gmail/SendGrid)         |
 | **API Bên Ngoài**        | Google Books API, OpenLibrary |
 | **Mapping**              | AutoMapper                    |
 | **Kiến Trúc**            | Repository-Service-Controller |
@@ -200,7 +200,6 @@ Swagger UI: `http://localhost:5072/swagger`
 - **BookCaches** - Cache từ Google Books
 - **Reviews** - Rating 1-5 sao
 - **Forums** - Chủ đề thảo luận
-- **Replies** - Phản hồi
 - **Favorites** - Quan hệ User-Book
 
 ---
