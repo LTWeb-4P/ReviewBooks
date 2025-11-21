@@ -16,20 +16,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Npgsql;
-
+using DotNetEnv;
 var builder = WebApplication.CreateBuilder(args);
-
+Env.Load();
 var bookApiKey = Environment.GetEnvironmentVariable("BOOK_API_KEY") ?? "";
 var rawConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
 var connectionString = rawConnection
     .Replace("${DB_HOST}", Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost")
-    .Replace("${DB_PORT}", Environment.GetEnvironmentVariable("DB_PORT") ?? "5432")
     .Replace("${DB_NAME}", Environment.GetEnvironmentVariable("DB_NAME") ?? "reviewbooks")
     .Replace("${DB_USER}", Environment.GetEnvironmentVariable("DB_USER") ?? "postgres")
     .Replace("${DB_PASSWORD}", Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "");
 
 var builderDb = new NpgsqlConnectionStringBuilder(connectionString);
-
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
