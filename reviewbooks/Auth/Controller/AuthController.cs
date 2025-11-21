@@ -29,56 +29,22 @@ namespace ReviewBooks.Auth.Controller
 
                 if (loginResponse != null)
                 {
-                    // Return HTML page with auto-redirect to Swagger
-                    var backendUrl = _configuration["App:BackendUrl"] ?? "http://localhost:8080";
-                    var html = $@"
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Email Verified</title>
-    <style>
-        body {{ font-family: Arial; text-align: center; padding: 50px; }}
-        .success {{ color: #28a745; }}
-        .token {{ background: #f5f5f5; padding: 15px; margin: 20px; word-break: break-all; }}
-        button {{ background: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px; }}
-    </style>
-</head>
-<body>
-    <h1 class='success'>✓ Email Verified Successfully!</h1>
-    <p>Your JWT Token:</p>
-    <div class='token'>{loginResponse.Token}</div>
-    <p>Copy the token above and use it in Swagger Authorization</p>
-    <button onclick=""window.location.href='{backendUrl}/swagger/index.html'"">Go to Swagger</button>
-</body>
-</html>";
-                    return Content(html, "text/html");
+                    // Redirect to frontend login page after successful verification
+                    var frontendUrl = _configuration["App:FrontendUrl"] ?? "http://localhost:3000";
+                    return Redirect($"{frontendUrl}/login?verified=true");
                 }
                 else
                 {
-                    var html = @"
-<!DOCTYPE html>
-<html>
-<head><title>Verification Failed</title></head>
-<body style='font-family: Arial; text-align: center; padding: 50px;'>
-    <h1 style='color: #dc3545;'>✗ Verification Failed</h1>
-    <p>Invalid or expired verification link</p>
-</body>
-</html>";
-                    return Content(html, "text/html");
+                    // Redirect to frontend with error
+                    var frontendUrl = _configuration["App:FrontendUrl"] ?? "http://localhost:3000";
+                    return Redirect($"{frontendUrl}/login?verified=false&error=invalid_token");
                 }
             }
             catch (Exception)
             {
-                var html = @"
-<!DOCTYPE html>
-<html>
-<head><title>Error</title></head>
-<body style='font-family: Arial; text-align: center; padding: 50px;'>
-    <h1 style='color: #dc3545;'>✗ Verification Failed</h1>
-    <p>An error occurred during verification</p>
-</body>
-</html>";
-                return Content(html, "text/html");
+                // Redirect to frontend with error
+                var frontendUrl = _configuration["App:FrontendUrl"] ?? "http://localhost:3000";
+                return Redirect($"{frontendUrl}/login?verified=false&error=verification_failed");
             }
         }
 

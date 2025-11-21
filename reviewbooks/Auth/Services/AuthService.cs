@@ -81,7 +81,7 @@ namespace ReviewBooks.Auth.Services
         {
             Console.WriteLine($"[SendVerificationEmailAsync] pendingUser.Email = '{pendingUser.Email}'");
 
-            var backendUrl = _configuration["App:BackendUrl"] ?? "http://localhost:8080/swagger/index.html";
+            var backendUrl = _configuration["App:BackendUrl"] ?? "http://localhost:8080";
             var verifyUrl = $"{backendUrl}/api/auth/verify-email?userId={pendingUser.Id}&token={pendingUser.VerifyToken}";
 
             var emailBody = $@"
@@ -168,6 +168,16 @@ namespace ReviewBooks.Auth.Services
 
             if (pending.TokenExpires < DateTime.UtcNow)
             {
+                _context.PendingRegistrations.Remove(pending);
+                await _context.SaveChangesAsync();
+                return null;
+            }
+
+            // Kiểm tra xem user đã được tạo chưa (tránh verify nhiều lần)
+            var existingUser = await _userRepository.GetUserByEmailAsync(pending.Email);
+            if (existingUser != null)
+            {
+                // User đã được verify rồi, xóa pending và trả về null
                 _context.PendingRegistrations.Remove(pending);
                 await _context.SaveChangesAsync();
                 return null;
