@@ -29,22 +29,22 @@ namespace ReviewBooks.Auth.Controller
 
                 if (loginResponse != null)
                 {
-                    // Redirect to frontend login page after successful verification
+                    // Redirect to frontend homepage after successful verification
                     var frontendUrl = _configuration["App:FrontendUrl"] ?? "http://localhost:3000";
-                    return Redirect($"{frontendUrl}/login?verified=true");
+                    return Redirect(frontendUrl);
                 }
                 else
                 {
-                    // Redirect to frontend with error
+                    // Redirect to frontend homepage even if verification fails
                     var frontendUrl = _configuration["App:FrontendUrl"] ?? "http://localhost:3000";
-                    return Redirect($"{frontendUrl}/login?verified=false&error=invalid_token");
+                    return Redirect(frontendUrl);
                 }
             }
             catch (Exception)
             {
-                // Redirect to frontend with error
+                // Redirect to frontend homepage if error occurs
                 var frontendUrl = _configuration["App:FrontendUrl"] ?? "http://localhost:3000";
-                return Redirect($"{frontendUrl}/login?verified=false&error=verification_failed");
+                return Redirect(frontendUrl);
             }
         }
 
